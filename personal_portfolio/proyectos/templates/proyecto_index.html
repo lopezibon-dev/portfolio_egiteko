@@ -18,6 +18,13 @@
                     <input type="text" name="tecnologia"/>
                     <input type="submit" value="Aldatu"/>
                 </form>
+                <p class="card-text">Nahi dituzu galderak ikusi? Egin klik 
+                        <a class="btn btn-primary btn-galderak"
+                            data-id="{{ proyecto.pk }}"
+                            data-url="{% url 'leer_preguntas' proyecto.pk %}"
+                            href="#">hemen</a>
+                </p>
+                <div id="galderak-{{ proyecto.pk }}"></div>
                 <br>
                 <a href="{% url 'proyecto_detail' proyecto.pk %}" class="btn btn-primary">
                     Read More
@@ -61,6 +68,54 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error(error);
             });
         }
+    });
+
+    // galderak botoientzako listener 
+    document.querySelectorAll('.btn-galderak').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const id = this.dataset.id;
+            const url = this.dataset.url;
+            const contenedor = document.getElementById('galderak-' + id);
+
+            if (!contenedor) return;
+
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Errorea');
+                return response.json();
+            })
+            .then(data => {
+                // Aurretik zegoena garbitu
+                contenedor.innerHTML = '';
+
+                const ul = document.createElement('ul');
+
+                if (!data.galderak || data.galderak.length === 0) {
+                    const li = document.createElement('li');
+                    li.textContent = 'Ez dago galderarik';
+                    ul.appendChild(li);
+                } else {
+                    data.galderak.forEach(function (p) {
+                        const li = document.createElement('li');
+                        li.textContent = p.testua;
+                        ul.appendChild(li);
+                    });
+                }
+
+                contenedor.appendChild(ul);
+            })
+            .catch(error => {
+                console.error(error);
+                alert('Ezin dira galderak kargatu. Saiatu beranduago.');
+            });
+        });
     });
 
     // CSRF token-a lortzeko funtzioa (Django-n beharrezkoa)

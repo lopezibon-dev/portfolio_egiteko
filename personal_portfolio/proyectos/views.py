@@ -75,3 +75,13 @@ def post_teknologia(request):
         sql = "UPDATE proyectos_proyecto set tecnologia = %s where id = %s"
         cursor.execute(sql, [post_tekno, post_id])
     return JsonResponse({"id": post_id, "tecnologia": post_tekno}, status=200)
+
+def leer_preguntas(request, pk):
+    with connection.cursor() as cursor:
+        sql = "SELECT id, pregunta_texto FROM proyectos_pregunta WHERE proyecto_id = %s"
+        cursor.execute(sql, [pk])
+        filas = cursor.fetchall()
+
+    preguntas = [{"id": fila[0], "testua": fila[1]} for fila in filas]
+
+    return JsonResponse({"galderak": preguntas}, status=200)
